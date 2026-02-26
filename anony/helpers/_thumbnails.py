@@ -17,8 +17,8 @@ from anony.helpers import Track
 def load_fonts():
     try:
         return {
-            "title": ImageFont.truetype("anony/helpers/Raleway-Bold.ttf", 40),
-            "artist": ImageFont.truetype("anony/helpers/Inter-Light.ttf", 26),
+            "title": ImageFont.truetype("anony/helpers/Raleway-Bold.ttf", 42),
+            "artist": ImageFont.truetype("anony/helpers/Inter-Light.ttf", 28),
             "small": ImageFont.truetype("anony/helpers/Inter-Light.ttf", 22),
         }
     except:
@@ -40,50 +40,49 @@ async def fetch_image(url: str) -> Image.Image:
             img = Image.open(BytesIO(r.content)).convert("RGBA")
             return ImageOps.fit(img, (1280, 720), Image.Resampling.LANCZOS)
         except:
-            return Image.new("RGBA", (1280, 720), (20, 20, 30, 255))
+            return Image.new("RGBA", (1280, 720), (25, 18, 18, 255))
 
 
 class Thumbnail:
     async def generate(self, song: Track) -> str:
         try:
             os.makedirs("cache", exist_ok=True)
-            save_path = f"cache/{song.id}_perfect.png"
+            save_path = f"cache/{song.id}_final.png"
 
             thumb = await fetch_image(song.thumbnail)
 
             width, height = 1280, 720
 
-            # ===== STRONG BACKGROUND BLUR =====
+            # ===== BACKGROUND =====
             bg = thumb.resize((width, height), Image.Resampling.LANCZOS)
-            bg = bg.filter(ImageFilter.GaussianBlur(70))
-            bg = ImageEnhance.Brightness(bg).enhance(0.7)
+            bg = bg.filter(ImageFilter.GaussianBlur(75))
+            bg = ImageEnhance.Brightness(bg).enhance(0.65)
 
-            # Warm tint
-            tint = Image.new("RGBA", (width, height), (25, 18, 18, 130))
+            tint = Image.new("RGBA", (width, height), (30, 20, 20, 120))
             bg = Image.alpha_composite(bg.convert("RGBA"), tint)
 
-            # ===== BIGGER PANEL =====
-            panel_w, panel_h = 960, 560
+            # ===== PANEL SIZE (TALLER + BALANCED) =====
+            panel_w, panel_h = 980, 600
             panel_x = (width - panel_w) // 2
             panel_y = (height - panel_h) // 2
 
-            # ===== HEAVY SHADOW =====
-            shadow = Image.new("RGBA", (panel_w, panel_h), (0, 0, 0, 240))
+            # ===== SHADOW =====
+            shadow = Image.new("RGBA", (panel_w, panel_h), (0, 0, 0, 255))
             shadow_mask = Image.new("L", (panel_w, panel_h), 0)
             ImageDraw.Draw(shadow_mask).rounded_rectangle(
                 (0, 0, panel_w, panel_h),
-                radius=60,
+                radius=70,
                 fill=255
             )
             shadow.putalpha(shadow_mask)
-            bg.paste(shadow, (panel_x + 25, panel_y + 40), shadow)
+            bg.paste(shadow, (panel_x + 35, panel_y + 50), shadow)
 
-            # ===== GLASS CARD =====
-            glass = Image.new("RGBA", (panel_w, panel_h), (38, 38, 38, 160))
+            # ===== GLASS PANEL =====
+            glass = Image.new("RGBA", (panel_w, panel_h), (40, 40, 40, 155))
             mask = Image.new("L", (panel_w, panel_h), 0)
             ImageDraw.Draw(mask).rounded_rectangle(
                 (0, 0, panel_w, panel_h),
-                radius=60,
+                radius=70,
                 fill=255
             )
             glass.putalpha(mask)
@@ -93,94 +92,94 @@ class Thumbnail:
 
             # ===== COVER =====
             cover = ImageOps.fit(
-                thumb, (250, 250), Image.Resampling.LANCZOS
+                thumb, (260, 260), Image.Resampling.LANCZOS
             )
 
-            cover_mask = Image.new("L", (250, 250), 0)
+            cover_mask = Image.new("L", (260, 260), 0)
             ImageDraw.Draw(cover_mask).rounded_rectangle(
-                (0, 0, 250, 250), radius=40, fill=255
+                (0, 0, 260, 260), radius=45, fill=255
             )
             cover.putalpha(cover_mask)
 
-            bg.paste(cover, (panel_x + 90, panel_y + 110), cover)
+            bg.paste(cover, (panel_x + 90, panel_y + 150), cover)
 
             # ===== TEXT =====
-            title = (song.title or "Unknown Title")[:42]
-            artist = (song.channel_name or "Unknown Artist")[:38]
+            title = (song.title or "Unknown Title")[:45]
+            artist = (song.channel_name or "Unknown Artist")[:40]
 
             draw.text(
-                (panel_x + 420, panel_y + 130),
+                (panel_x + 460, panel_y + 170),
                 title,
                 fill="white",
                 font=FONTS["title"],
             )
 
             draw.text(
-                (panel_x + 420, panel_y + 185),
+                (panel_x + 460, panel_y + 230),
                 artist,
                 fill=(210, 210, 210),
                 font=FONTS["artist"],
             )
 
             # ===== MAIN PROGRESS =====
-            bar_x1 = panel_x + 420
-            bar_x2 = panel_x + 900
-            bar_y = panel_y + 260
+            bar_x1 = panel_x + 460
+            bar_x2 = panel_x + 940
+            bar_y = panel_y + 310
 
             draw.line(
                 [(bar_x1, bar_y), (bar_x2, bar_y)],
-                fill=(170, 170, 170),
-                width=6,
+                fill=(180, 180, 180),
+                width=7,
             )
 
-            progress = bar_x1 + 260
+            progress = bar_x1 + 280
             draw.line(
                 [(bar_x1, bar_y), (progress, bar_y)],
                 fill="white",
-                width=6,
+                width=7,
             )
 
             draw.text(
-                (bar_x1, bar_y - 30),
+                (bar_x1, bar_y - 35),
                 "0:24",
                 fill="white",
                 font=FONTS["small"],
             )
 
             draw.text(
-                (bar_x2 - 60, bar_y - 30),
+                (bar_x2 - 70, bar_y - 35),
                 song.duration or "--:--",
                 fill="white",
                 font=FONTS["small"],
             )
 
-            # ===== CONTROLS PNG =====
+            # ===== CONTROLS =====
             try:
                 controls = Image.open("anony/assets/controls.png").convert("RGBA")
-                controls = controls.resize((700, 200), Image.Resampling.LANCZOS)
+                controls = controls.resize((740, 210), Image.Resampling.LANCZOS)
 
                 bg.paste(
                     controls,
-                    (panel_x + 140, panel_y + 320),
+                    (panel_x + 160, panel_y + 360),
                     controls
                 )
             except:
                 pass
 
             # ===== VOLUME BAR =====
-            vol_y = panel_y + 500
+            vol_y = panel_y + 560
 
             draw.line(
-                [(panel_x + 180, vol_y),
-                 (panel_x + 900, vol_y)],
+                [(panel_x + 220, vol_y),
+                 (panel_x + 940, vol_y)],
                 fill=(150, 150, 150),
                 width=6,
             )
 
             draw.line(
-                [(panel_x + 180, vol_y),
-                 (panel_x + 520, vol_y)],
-                fill=(220, 220, 220),
+                [(panel_x + 220, vol_y),
+                 (panel_x + 560, vol_y)],
+                fill=(230, 230, 230),
                 width=6,
             )
 
