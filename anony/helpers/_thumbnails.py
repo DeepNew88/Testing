@@ -98,7 +98,7 @@ class Thumbnail:
             bg.paste(cover, (325, 155), cover)
 
             # ===== TEXT (Improved Spacing) =====
-            title = (song.title or "Unknown Title")[:45]
+            title = (song.title or "Unknown Title")[:43]
             artist = (song.channel_name or "Unknown Artist")[:40]
 
             draw.text(
