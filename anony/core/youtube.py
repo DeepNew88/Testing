@@ -1,19 +1,15 @@
-# Copyright (c) 2025 AnonymousX1025
-# Licensed under the MIT License.
-# This file is part of AnonXMusic
-
 import os
 import re
 import asyncio
-import aiohttp
 from pathlib import Path
+from typing import Union, Optional
 
 from py_yt import Playlist, VideosSearch
 
 from anony import logger
 from anony.helpers import Track, utils
-from config import API_URL
 from anony.helpers._httpx import HttpxClient
+from config import API_URL
 
 
 class YouTube:
@@ -25,22 +21,15 @@ class YouTube:
             r"([A-Za-z0-9_-]{11}|PL[A-Za-z0-9_-]+)([&?][^\s]*)?"
         )
 
-    # =========================
-    # URL VALIDATION
-    # =========================
     def valid(self, url: str) -> bool:
         return bool(re.match(self.regex, url))
 
-    # =========================
-    # SEARCH
-    # =========================
     async def search(self, query: str, m_id: int, video: bool = False) -> Track | None:
         _search = VideosSearch(query, limit=1, with_live=False)
         results = await _search.next()
 
         if results and results["result"]:
             data = results["result"][0]
-
             return Track(
                 id=data.get("id"),
                 channel_name=data.get("channel", {}).get("name"),
@@ -55,14 +44,10 @@ class YouTube:
             )
         return None
 
-    # =========================
-    # PLAYLIST
-    # =========================
-    async def playlist(self, limit: int, user: str, url: str, video: bool):
+    async def playlist(self, limit: int, user: str, url: str, video: bool) -> list[Track | None]:
         tracks = []
         try:
             plist = await Playlist.get(url)
-
             for data in plist["videos"][:limit]:
                 track = Track(
                     id=data.get("id"),
@@ -77,15 +62,10 @@ class YouTube:
                     video=video,
                 )
                 tracks.append(track)
-
         except Exception as e:
             logger.warning("Playlist fetch failed: %s", e)
-
         return tracks
 
-    # =========================
-    # PURE API DOWNLOAD
-    # =========================
     async def download(self, video_id: str, video: bool = False) -> str | None:
         """
         API Only Download (No yt-dlp, No cookies)
@@ -95,6 +75,7 @@ class YouTube:
             logger.error("API_URL not set in config.")
             return None
 
+        # Build video URL
         video_url = self.base + video_id
         client = HttpxClient()
 
@@ -104,35 +85,33 @@ class YouTube:
             )
 
             if not response:
-                logger.warning("Empty response from API.")
+                logger.warning("Empty API response.")
                 return None
 
             cdn_url = response.get("cdnurl")
-
             if not cdn_url:
                 logger.warning("cdnurl missing in API response.")
                 return None
 
-            # 🔹 Direct CDN File
+            # Direct file
             if not cdn_url.startswith("https://t.me/"):
                 result = await client.download_file(cdn_url)
                 if result.success:
                     return str(result.file_path)
-                else:
-                    logger.warning("CDN file download failed.")
-                    return None
+                logger.warning("CDN download failed.")
+                return None
 
-            # 🔹 Telegram CDN
+            # Telegram CDN
             try:
                 from anony import app
-                msg = await app.get_messages(cdn_url)
+                parts = cdn_url.rstrip("/").split("/")
+                chat_username = parts[-2]
+                message_id = int(parts[-1])
 
+                msg = await app.get_messages(chat_id=chat_username, message_ids=message_id)
                 if msg:
-                    path = await msg.download()
-                    return path
-                else:
-                    logger.warning("Telegram message not found.")
-                    return None
+                    return await msg.download()
+                return None
 
             except Exception as e:
                 logger.warning("Telegram CDN failed: %s", e)
