@@ -6,6 +6,7 @@ load_dotenv()
 # ✅ GLOBAL VARIABLES (IMPORTANT)
 API_URL = getenv("API_URL") or "https://beta.fallenapi.fun"
 API_KEY = getenv("API_KEY")
+DOWNLOADS_DIR = "downloads"
 
 
 class Config:
