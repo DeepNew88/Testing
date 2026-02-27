@@ -77,19 +77,13 @@ class Thumbnail:
             panel_h = height - (panel_margin_y * 2)
 
             # ===== NATURAL GLASS EFFECT =====
-
-            # Crop panel region
             panel_area = bg.crop(
                 (panel_x, panel_y, panel_x + panel_w, panel_y + panel_h)
             )
 
-            # Slight extra blur
             panel_area = panel_area.filter(ImageFilter.GaussianBlur(10))
-
-            # Darken panel region slightly
             panel_area = ImageEnhance.Brightness(panel_area).enhance(0.5)
 
-            # Rounded mask
             mask = Image.new("L", (panel_w, panel_h), 0)
             ImageDraw.Draw(mask).rounded_rectangle(
                 (0, 0, panel_w, panel_h),
@@ -148,6 +142,29 @@ class Thumbnail:
                 )
             except:
                 pass
+
+            # ===== TIME DISPLAY =====
+            current_time = "0:24"
+            total_time = getattr(song, "duration", "3:25")
+
+            time_y = 395
+
+            # Left time
+            draw.text(
+                (panel_x + 40, time_y),
+                current_time,
+                fill=(220, 220, 220),
+                font=FONTS["small"],
+            )
+
+            # Right time (auto aligned)
+            total_width = draw.textlength(total_time, font=FONTS["small"])
+            draw.text(
+                (panel_x + panel_w - 40 - total_width, time_y),
+                total_time,
+                fill=(220, 220, 220),
+                font=FONTS["small"],
+            )
 
             bg.save(save_path, "PNG", quality=95)
             return save_path
