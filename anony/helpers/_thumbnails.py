@@ -17,7 +17,7 @@ from anony.helpers import Track
 def load_fonts():
     try:
         return {
-            "title": ImageFont.truetype("anony/helpers/Raleway-Bold.ttf", 40),
+            "title": ImageFont.truetype("anony/helpers/Raleway-Bold.ttf", 35),
             "artist": ImageFont.truetype("anony/helpers/Inter-Light.ttf", 28),
             "small": ImageFont.truetype("anony/helpers/Inter-Light.ttf", 22),
         }
@@ -64,7 +64,7 @@ class Thumbnail:
             # ===== BACKGROUND =====
             bg = thumb.copy()
             bg = bg.filter(ImageFilter.GaussianBlur(18))
-            bg = ImageEnhance.Brightness(bg).enhance(0.45)
+            bg = ImageEnhance.Brightness(bg).enhance(0.60)
 
             # ===== PANEL FRAME =====
             panel_margin_x = 260
