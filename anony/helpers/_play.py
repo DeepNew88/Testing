@@ -30,13 +30,21 @@ def checkUB(play):
             print("DB FLAG ERROR:", e)
             delete_flag = False
 
-        # ===== TRY DELETE AT START =====
+        # ===== FORCE DELETE /PLAY COMMAND (ALWAYS DELETE) =====
+        try:
+            if m.text and m.text.startswith("/play"):
+                await m.delete()
+                print("FORCE DELETE SUCCESS")
+        except Exception as e:
+            print("FORCE DELETE ERROR:", e)
+
+        # ===== ORIGINAL DB DELETE SYSTEM (UNCHANGED) =====
         try:
             if delete_flag:
                 await m.delete()
-                print("DELETE SUCCESS (START)")
+                print("DB DELETE SUCCESS")
         except Exception as e:
-            print("DELETE ERROR (START):", e)
+            print("DB DELETE ERROR:", e)
 
         if m.chat.type not in [enums.ChatType.SUPERGROUP, enums.ChatType.GROUP]:
             await m.reply_text(m.lang["play_chat_invalid"])
@@ -141,16 +149,7 @@ def checkUB(play):
                 await umm.delete()
                 await client.resolve_peer(chat_id)
 
-        # ===== CALL PLAY =====
         result = await play(_, m, force, m3u8, video, url)
-
-        # ===== TRY DELETE AGAIN AFTER PLAY =====
-        try:
-            if delete_flag:
-                await m.delete()
-                print("DELETE SUCCESS (END)")
-        except Exception as e:
-            print("DELETE ERROR (END):", e)
 
         print("========== END DEBUG ==========")
 
