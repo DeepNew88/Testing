@@ -30,11 +30,17 @@ def checkUB(play):
             print("DB FLAG ERROR:", e)
             delete_flag = False
 
-        # ===== FORCE DELETE /PLAY COMMAND (ALWAYS DELETE) =====
+        # ===== FORCE DELETE ALL PLAY COMMANDS =====
         try:
-            if m.text and m.text.startswith("/play"):
-                await m.delete()
-                print("FORCE DELETE SUCCESS")
+            if m.text:
+                cmd = m.text.split()[0].lower()
+
+                if (
+                    cmd.startswith("/play")
+                    or cmd.startswith("/vplay")
+                ):
+                    await m.delete()
+                    print("FORCE DELETE SUCCESS")
         except Exception as e:
             print("FORCE DELETE ERROR:", e)
 
