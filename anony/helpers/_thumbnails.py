@@ -58,7 +58,7 @@ class Thumbnail:
             bg = bg.filter(ImageFilter.GaussianBlur(55))
             bg = ImageEnhance.Brightness(bg).enhance(0.45)
 
-            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 160))
+            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 70))
             bg = Image.alpha_composite(bg.convert("RGBA"), dark_overlay)
 
             # ===== PANEL FRAME (Same Old Framing) =====
