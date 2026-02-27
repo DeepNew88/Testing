@@ -61,14 +61,9 @@ class Thumbnail:
 
             width, height = 1280, 720
 
-            # ===== BACKGROUND (OLD NATURAL STYLE) =====
+            # ===== BACKGROUND =====
             bg = thumb.copy()
-            bg = bg.filter(ImageFilter.GaussianBlur(15))
-            bg = ImageEnhance.Brightness(bg).enhance(1.0)
-
-            # Very very light overlay
-            dark_overlay = Image.new("RGBA", (width, height), (0, 0, 0, 8))
-            bg = Image.alpha_composite(bg, dark_overlay)
+            bg = bg.filter(ImageFilter.GaussianBlur(18))
 
             # ===== PANEL FRAME =====
             panel_margin_x = 220
@@ -80,18 +75,20 @@ class Thumbnail:
             panel_w = width - (panel_margin_x * 2)
             panel_h = height - (panel_margin_y * 2)
 
-            # ===== TRUE TRANSPARENT GLASS =====
+            # ===== NATURAL GLASS EFFECT =====
 
-            # Blur only inside panel
+            # Crop panel region
             panel_area = bg.crop(
                 (panel_x, panel_y, panel_x + panel_w, panel_y + panel_h)
             )
+
+            # Slight extra blur
             panel_area = panel_area.filter(ImageFilter.GaussianBlur(10))
-            bg.paste(panel_area, (panel_x, panel_y))
 
-            # Ultra light transparent layer (almost invisible)
-            glass = Image.new("RGBA", (panel_w, panel_h), (255, 255, 255, 20))
+            # Darken panel region slightly
+            panel_area = ImageEnhance.Brightness(panel_area).enhance(0.55)
 
+            # Rounded mask
             mask = Image.new("L", (panel_w, panel_h), 0)
             ImageDraw.Draw(mask).rounded_rectangle(
                 (0, 0, panel_w, panel_h),
@@ -99,8 +96,7 @@ class Thumbnail:
                 fill=255,
             )
 
-            glass.putalpha(mask)
-            bg.paste(glass, (panel_x, panel_y), glass)
+            bg.paste(panel_area, (panel_x, panel_y), mask)
 
             draw = ImageDraw.Draw(bg)
 
