@@ -17,14 +17,27 @@ def checkUB(play):
 
         chat_id = m.chat.id
 
-        # ===== AUTO DELETE /PLAY COMMAND =====
-        try:
-            if await db.get_cmd_delete(chat_id):
-                await m.delete()
-        except Exception as e:
-            logger.error(f"Delete failed: {e}")
+        print("========== PLAY WRAPPER DEBUG ==========")
+        print("Chat ID:", chat_id)
+        print("Chat Type:", m.chat.type)
+        print("User ID:", m.from_user.id)
 
-        # ===== GROUP CHECK (UPDATED) =====
+        # ===== DEBUG DB FLAG =====
+        try:
+            delete_flag = await db.get_cmd_delete(chat_id)
+            print("DB DELETE FLAG:", delete_flag)
+        except Exception as e:
+            print("DB FLAG ERROR:", e)
+            delete_flag = False
+
+        # ===== TRY DELETE AT START =====
+        try:
+            if delete_flag:
+                await m.delete()
+                print("DELETE SUCCESS (START)")
+        except Exception as e:
+            print("DELETE ERROR (START):", e)
+
         if m.chat.type not in [enums.ChatType.SUPERGROUP, enums.ChatType.GROUP]:
             await m.reply_text(m.lang["play_chat_invalid"])
             return await app.leave_chat(chat_id)
@@ -128,6 +141,19 @@ def checkUB(play):
                 await umm.delete()
                 await client.resolve_peer(chat_id)
 
-        return await play(_, m, force, m3u8, video, url)
+        # ===== CALL PLAY =====
+        result = await play(_, m, force, m3u8, video, url)
+
+        # ===== TRY DELETE AGAIN AFTER PLAY =====
+        try:
+            if delete_flag:
+                await m.delete()
+                print("DELETE SUCCESS (END)")
+        except Exception as e:
+            print("DELETE ERROR (END):", e)
+
+        print("========== END DEBUG ==========")
+
+        return result
 
     return wrapper
