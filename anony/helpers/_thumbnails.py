@@ -146,11 +146,11 @@ class Thumbnail:
             # ===== END TIME (RIGHT SIDE ONLY) =====
             total_time = getattr(song, "duration", "3:25")
 
-            time_y = 428  # aligned with progress bar
+            time_y = 427  # aligned with progress bar
             text_width = draw.textlength(total_time, font=FONTS["small"])
 
             draw.text(
-                (panel_x + panel_w - 80 - text_width, time_y),
+                (panel_x + panel_w - 100 - text_width, time_y),
                 total_time,
                 fill=(220, 220, 220),
                 font=FONTS["small"],
