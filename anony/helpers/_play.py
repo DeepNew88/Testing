@@ -17,17 +17,10 @@ def checkUB(play):
 
         chat_id = m.chat.id
 
-        print("========== PLAY WRAPPER DEBUG ==========")
-        print("Chat ID:", chat_id)
-        print("Chat Type:", m.chat.type)
-        print("User ID:", m.from_user.id)
-
-        # ===== DEBUG DB FLAG =====
+        # ===== GET DB DELETE FLAG =====
         try:
             delete_flag = await db.get_cmd_delete(chat_id)
-            print("DB DELETE FLAG:", delete_flag)
-        except Exception as e:
-            print("DB FLAG ERROR:", e)
+        except Exception:
             delete_flag = False
 
         # ===== FORCE DELETE ALL PLAY COMMANDS =====
@@ -40,17 +33,15 @@ def checkUB(play):
                     or cmd.startswith("/vplay")
                 ):
                     await m.delete()
-                    print("FORCE DELETE SUCCESS")
-        except Exception as e:
-            print("FORCE DELETE ERROR:", e)
+        except Exception:
+            pass
 
         # ===== ORIGINAL DB DELETE SYSTEM (UNCHANGED) =====
         try:
             if delete_flag:
                 await m.delete()
-                print("DB DELETE SUCCESS")
-        except Exception as e:
-            print("DB DELETE ERROR:", e)
+        except Exception:
+            pass
 
         if m.chat.type not in [enums.ChatType.SUPERGROUP, enums.ChatType.GROUP]:
             await m.reply_text(m.lang["play_chat_invalid"])
@@ -155,10 +146,6 @@ def checkUB(play):
                 await umm.delete()
                 await client.resolve_peer(chat_id)
 
-        result = await play(_, m, force, m3u8, video, url)
-
-        print("========== END DEBUG ==========")
-
-        return result
+        return await play(_, m, force, m3u8, video, url)
 
     return wrapper
