@@ -114,7 +114,7 @@ class Thumbnail:
 
             # ===== SMALL LABEL ABOVE TITLE =====
             draw.text(
-                (520, 175),
+                (520, 170),
                 "Nancy Music",
                 fill=(200, 200, 200),
                 font=FONTS["small"],
@@ -125,14 +125,14 @@ class Thumbnail:
             artist = (song.channel_name or "Unknown Artist")[:40]
 
             draw.text(
-                (520, 200),
+                (520, 205),
                 title,
                 fill="white",
                 font=FONTS["title"],
             )
 
             draw.text(
-                (520, 255),
+                (520, 260),
                 artist,
                 fill=(210, 210, 210),
                 font=FONTS["artist"],
@@ -150,6 +150,16 @@ class Thumbnail:
                 )
             except:
                 pass
+
+            # ===== REMOVE DASH FROM CONTROLS =====
+            erase_x = 880
+            erase_y = 430
+            erase_w = 50
+            erase_h = 25
+
+            patch = bg.crop((erase_x, erase_y, erase_x + erase_w, erase_y + erase_h))
+            patch = patch.filter(ImageFilter.GaussianBlur(30))
+            bg.paste(patch, (erase_x, erase_y))
 
             # ===== END TIME (RIGHT SIDE ONLY) =====
             total_time = getattr(song, "duration", "3:25")
