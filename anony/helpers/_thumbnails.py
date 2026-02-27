@@ -72,8 +72,7 @@ class Thumbnail:
             bg = Image.alpha_composite(bg, dark_overlay)
 
             # ===== PANEL FRAME =====
-            # ===== BIGGER GLASS PANEL =====
-            panel_margin_x = 180   # left-right spacing
+            panel_margin_x = 150   # left-right spacing
             panel_margin_y = 90    # top-bottom spacing
 
             panel_x = panel_margin_x
