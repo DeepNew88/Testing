@@ -13,6 +13,16 @@ from anony.helpers import can_manage_vc
 @lang.language()
 @can_manage_vc
 async def _skip(_, m: types.Message):
+
+    # ===== AUTO DELETE /skip & /next COMMAND =====
+    try:
+        if m.text:
+            cmd = m.text.split()[0].lower()
+            if cmd.startswith("/skip") or cmd.startswith("/next"):
+                await m.delete()
+    except Exception:
+        pass
+
     if not await db.get_call(m.chat.id):
         return await m.reply_text(m.lang["not_playing"])
 
