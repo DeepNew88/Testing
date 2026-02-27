@@ -18,14 +18,14 @@ def checkUB(play):
         chat_id = m.chat.id
 
         # ===== AUTO DELETE /PLAY COMMAND =====
-        # (DB flag bhi rahega + guaranteed delete attempt)
         try:
             if await db.get_cmd_delete(chat_id):
                 await m.delete()
         except Exception as e:
             logger.error(f"Delete failed: {e}")
 
-        if m.chat.type != enums.ChatType.SUPERGROUP:
+        # ===== GROUP CHECK (UPDATED) =====
+        if m.chat.type not in [enums.ChatType.SUPERGROUP, enums.ChatType.GROUP]:
             await m.reply_text(m.lang["play_chat_invalid"])
             return await app.leave_chat(chat_id)
 
