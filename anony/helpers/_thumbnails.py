@@ -72,9 +72,15 @@ class Thumbnail:
             bg = Image.alpha_composite(bg, dark_overlay)
 
             # ===== PANEL FRAME =====
-            panel_x, panel_y = 305, 125
-            panel_w = 975 - 305
-            panel_h = 595 - 125
+            # ===== BIGGER GLASS PANEL =====
+            panel_margin_x = 180   # left-right spacing
+            panel_margin_y = 90    # top-bottom spacing
+
+            panel_x = panel_margin_x
+            panel_y = panel_margin_y
+
+            panel_w = width - (panel_margin_x * 2)
+            panel_h = height - (panel_margin_y * 2)
 
             # ===== GLASS PANEL =====
             glass = Image.new("RGBA", (panel_w, panel_h), (35, 35, 35, 190))
