@@ -80,7 +80,7 @@ class Thumbnail:
             panel_h = height - (panel_margin_y * 2)
 
             # ===== GLASS PANEL =====
-            glass = Image.new("RGBA", (panel_w, panel_h), (35, 35, 35, 190))
+            glass = Image.new("RGBA", (panel_w, panel_h), (35, 35, 35, 120))
             mask = Image.new("L", (panel_w, panel_h), 0)
 
             ImageDraw.Draw(mask).rounded_rectangle(
